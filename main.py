@@ -20,6 +20,8 @@ def main(argv=None):
     # Combine cleaned GMC and medicare data
     combine_data()
 
+    # Analysis
+
 
 def prep_data(gmc_data_source, medicare_data_sources):
     """
@@ -65,7 +67,6 @@ def prep_data(gmc_data_source, medicare_data_sources):
     
     with open(util.INT_MEDICARE_LAB_DATA, "w") as f:
         f.writelines(lines[3:])
-
 
 def clean_gmc_data():
     """
