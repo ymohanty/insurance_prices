@@ -5,13 +5,21 @@ import util
 import util.plotting as plotting
 
 def main(argv):
+    """
+    Main function to prepare, clean, combine, and analyze GMC and medicare data.
+    Args:
+        argv (list): List of command line arguments.
+
+    Returns:
+        None
+    """
     if len(argv) == 1:
         print("Usage: python main.py <gmc_data_source> <medicare_data_sources>")
         print("We shall set default paths")
         argv.extend([util.GMC_DATA_SOURCE, util.MEDICARE_LVL1_SOURCE,
                      util.MEDICARE_LVL2_SOURCE, util.MEDICARE_LAB_SOURCE])
          
-    # ==== DATA PREPARATION ===
+    # ============== DATA PREPARATION ===============
     # Prep data for cleaning
     prep_data(argv[1],argv[2:])
 
@@ -22,8 +30,7 @@ def main(argv):
     # Combine cleaned GMC and medicare data
     combine_data()
 
-    # ==== ANALYSIS =====
-
+    # ================ ANALYSIS ==================
     # Load working data
     df = pd.read_csv(util.WORKING_DATA)
 
