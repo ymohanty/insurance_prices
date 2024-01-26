@@ -49,7 +49,6 @@ You would then to create the data folder manually, with three subfolders. After 
 ├── readme.MD
 ├── util
 │   ├── __init__.py
-│   ├── __pycache__
 │   ├── cleaning.py
 │   ├── plotting.py
 │   └── utilities.py
@@ -65,3 +64,4 @@ Finally, run the main Python file
 ```
 python main.py
 ```
+You should compile the output file output.tex manually using pdflatex to view the write-up.
