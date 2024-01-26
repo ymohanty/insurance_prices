@@ -29,4 +29,4 @@ CLEAN_MEDICARE_DATA = str( CLEAN_DATA + "/medicare_data.csv")
 WORKING_DATA = str( CLEAN_DATA + "/working_data.csv")
 
 # Output paths
-OUT_PATH = str( Path(__file__).resolve().parent.parent / 'figures')
+OUT_PATH = str( _PROJECT_ROOT / 'figures')
