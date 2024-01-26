@@ -52,3 +52,4 @@ def plot_bar(df, filename=None, weight='charges_share', disagg=True, xlab="Mean 
 
     # Save figure
     plt.savefig(filename, bbox_inches='tight')
+    print("Saved figure to " + filename)

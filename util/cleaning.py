@@ -92,6 +92,7 @@ def clean_gmc_data():
 
     # Save cleaned GMC data
     df.to_csv(util.CLEAN_GMC_DATA, index=False)
+    print("Saved to " + util.CLEAN_GMC_DATA)
 
 def clean_medicare_data():
     """
@@ -131,7 +132,6 @@ def clean_medicare_data():
     df['allowed_services'] = pd.to_numeric(df['allowed_services'], errors='coerce')
     df['allowed_charges'] = pd.to_numeric(df['allowed_charges'], errors='coerce')
     df['cpt_hcpcs'] = df['cpt_hcpcs'].astype(str)
-    print(df)
 
     # Compute shares spent on each service
     total_services = df['allowed_services'].sum()
@@ -141,6 +141,7 @@ def clean_medicare_data():
 
     # Save cleaned medicare data
     df.to_csv(util.CLEAN_MEDICARE_DATA, index=False)
+    print("Saved to " + util.CLEAN_MEDICARE_DATA)
 
 def combine_data():
     """
@@ -158,7 +159,7 @@ def combine_data():
     
     # Filter out rows with "minimum negotiated charge" and "maximum negotiated charge" under "insurer"
     df = df[~df["insurer"].isin(["Minimum Negotiated Charge", "Maximum Negotiated Charge"])]
-    print(df['insurer'].unique())
 
     # Save combined data
     df.to_csv(util.WORKING_DATA, index=False)
+    print("Saved to " + util.WORKING_DATA)
