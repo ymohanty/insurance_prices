@@ -3,6 +3,12 @@ from pathlib import Path
 # ~~~~~~~~~ Data paths ~~~~~~~~~~~~
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# URLS
+GMC_DATA_SOURCE = "https://www.cms.gov/files/zip/24-0795959_GeisingerMedicalCenter_standardcharges.csv"
+MEDICARE_LVL1_SOURCE = "https://www.cms.gov/files/document/cy-2021-top-100-lab-procedures-ranked-charges.pdf?agree=yes&next=Accept"
+MEDICARE_LVL2_SOURCE = "https://www.cms.gov/files/document/cy-2021-top-200-level-ii-hcpcs-codes-ranked-charges.pdf"
+MEDICARE_LAB_SOURCE = "https://www.geisinger.org/-/media/OneGeisinger/pdfs/ghs/patient-care/patients-and-visitors/billing-and-insurance/hosp-charges-csv/24-0795959_GeisingerMedicalCenter_standardcharges.zip?sc_lang=en&hash=072D5C5FAF045902CB9B58E93EB519EA"
+
 # Directories
 RAW_DATA = str (_PROJECT_ROOT / "data/raw/")
 INT_DATA = str (_PROJECT_ROOT / "data/intermediate/")
