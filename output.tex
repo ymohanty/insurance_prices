@@ -69,7 +69,55 @@
 \maketitle
 
 \subsection*{Running the project}
-Run the main shell file \verb|./main.sh|. If you do not have bash or zsh, you can run the main do file using \verb|python main.py <gmc data url> <medicare level 1 data url> <medicare level 2 data url> <medicare lab data url>|. The URLs are optional since they have been set as default parameters. However, the links may fail at any time. 
+Run the main shell file \verb|./main.sh|. If you do not have bash or zsh, you can run the main do file using \verb|python main.py|. The URLs that are needed to access the raw data are currently hard-coded, but they can be provied as command line arguments in order to mitigate the effects of link-rot. A more detailed discussion on the structure of the project can be found in the \verb|readme.MD| file.  
+
+\section*{Ranking insurers by cost}
+
+The US healthcare system -- and in particular healthcare billing -- is fairly labyrinthine to navigate and one usually needs considerable domain expertise to be able to understand and use healthcare data effectively. With this caveat out of the way, I can propose a rough and ready way to evaluate insurer cost in the context of services offeered at the Geisinger Medical Center (henceforth GMC). The simplest way to associate a ``price index" to an insurer providing coverage at GMC is to simply take the average price the insurer pays across all services offered by GMC that it coveres. That is, for insurer $i$, we can associate an index $P^0_i$ as
+\[
+	P^0_i := \frac{1}{\#S_i}\sum_{s\in S_i} c_{i,s}
+\]
+where $S_i$ denotes the collection of services/charges that insurer $i$ covers at GMC, and $c_{i,s}$ is the cost that insurer $i$ pays for service $s$ at GMC. While this a simple enough index, it is misleading since healthcare expenditure shares vary by the type of service. For instance, vaccines may be relatively cheap per unit, but mass vaccination (especially for Covid) could mean that total expenditure on vaccines is actually high. Conversely, treatment for bone tumors maybe very expensive per unit, but the number of patients who need bone tumor excisions could be relatively small, which may lead to a lower expenditure. Basically, the GMC data we have contains service \emph{prices} but not service \emph{quantities} and you need both to determine the total expenditure an insurer undertakes when covering patients.
+
+Recovering expenditure data for every insurer in the sample is beyond the scope of this 24 hour test, and so as a rather crude proxy, I use data from Medicare expenditure allocations for every CPT/HCPCS code in their database. This data is publicly available on the \href{https://www.cms.gov/data-research/statistics-trends-and-reports/medicare-fee-for-service-parts-a-b/medicare-utilization-part-b}{Medicare} website, and I use the Medicare allocations to construct shares for each CPT/HCPCS code (which roughly corresponds to a medical service). Letting $\rho_s$ denote the share of Medicare expenditure allocated to service $s$, we can compute a slightly different index
+\[
+	  P^1_i = \sum_{s \in S_i}\rho_s c_{i,s}.
+\]
+This index too has a number of drawbacks: for one, medicare generally serves those over 65 years of age, and the types of services availed by older patients tend to differ from those utilized by patients in general. There are some practical drawbacks too, since the medicare data is incomplete and does not contain al CPT/HCPCS codes. Nevertheless, as you can see in Figure \ref{fig:meanCost}, the ranking of insurers by cost is fairly robust to whichever price index we choose to use.
+
+Of course, the data in Figure \ref{fig:meanCost} is aggregated across costs for inpatient and outpatient care. It could be the case that some insurers are very cost-effective for inpatient care but become expensive for outpatient care or vice-versa. This largely turns out to not be the case: as Figure \ref{fig:meanCostDisagg} shows, the costs of inpatient and outpatient care for a given insurer are highly correlated. Thus a ranking where we only look at inpatient costs or outpatient costs tends to resemble one where we aggregate costs across types of care. 
+
+As a final comment on the substantive features of this ranking of providers, we can see that public insurance programs like Medicaid and Medicare rank on the cheaper side, perhaps reflecting their relatively high bargaining power in the insurance marketeplace, along with their large pool of customers. Whether aggregate healthcare prices would be lower in a counterfactual world with only a few public insurers remains an important question in the industrial organization of healthcare markets, and one which occupies much of the debate around healthcare policy today.
+
+\begin{figure}
+	\centering \caption{Mean cost by insurer\label{fig:meanCost}}
+	\subfiguretopcaptrue
+	\subfigure[Mean cost without medicare weights]{
+		\includegraphics[width=\linewidth]{barplot_ranked_charges_unweighted} 
+	}
+	\subfigure[Mean cost with medicare weights]{
+		\includegraphics[width=\linewidth]{barplot_ranked_charges_weighted} 
+	}
+	\begin{tabular*}{1.0\textwidth}{c}
+		\multicolumn{1}{p{1.0\hsize}}{\footnotesize The figure depicts the mean cost across services for insurers in the GMC data, where the costs are \emph{not} disaggregated by inpatient and outpatient treatment status. In Panel (a), we show the costs as a raw average i.e. this is the index $P^0_i$. In the panel (b), we use the medicare expenditure shares to construct $P^1_i$ . }\\
+	\end{tabular*}
+\end{figure}
+
+
+
+\begin{figure}[h]
+	\centering \caption{Mean cost by insurer, disaggregated by treatment status\label{fig:meanCostDisagg}}
+	\subfiguretopcaptrue
+	\subfigure[Mean cost without medicare weights]{
+		\includegraphics[width=\linewidth]{barplot_ranked_charges_disagg_unweighted} 
+	}
+	\subfigure[Mean cost with medicare weights]{
+		\includegraphics[width=\linewidth]{barplot_ranked_charges_disagg_weighted} 
+	}
+	\begin{tabular*}{1.0\textwidth}{c}
+		\multicolumn{1}{p{1.0\hsize}}{\footnotesize The figure depicts the mean cost across services for insurers in the GMC data, where the costs are disaggregated by inpatient and outpatient treatment status. The blue bars show inpatient treatment costs whereas the orange bars show the outpatient costs. In Panel (a), we show the costs as a raw average i.e. this is the index $P^0_i$. In the panel (b), we use the medicare expenditure shares to construct $P^1_i$ .. }\\
+	\end{tabular*}
+\end{figure}
 
 
 
