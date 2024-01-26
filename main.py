@@ -15,7 +15,10 @@ def main(argv=None):
 
     # Clean both GMC and medicare data
     #clean_gmc_data()
-    clean_medicare_data()
+    #clean_medicare_data()
+
+    # Combine cleaned GMC and medicare data
+    combine_data()
 
 
 def prep_data(gmc_data_source, medicare_data_sources):
@@ -99,6 +102,7 @@ def clean_gmc_data():
 
     # Filter out "Self Pay" observations from the "insurer" column
     df = df[df["insurer"] != "Self Pay"]
+    df = df["Maximum" not in df["insurer"]]
 
     # Rename column "CPT/HCPCS" to "cpt_hcpcs"
     df.rename(columns={"CPT/HCPCS": "cpt_hcpcs"}, inplace=True)
@@ -146,16 +150,35 @@ def clean_medicare_data():
     df['cpt_hcpcs'] = df['cpt_hcpcs'].astype(str)
     print(df)
 
-    # Percentage spending
-    # Compute the percentage of total spending
+    # Compute shares spent on each service
     total_services = df['allowed_services'].sum()
     total_charges = df['allowed_charges'].sum()
-
     df['services_share'] = (df['allowed_services'] / total_services) 
     df['charges_share'] = (df['allowed_charges'] / total_charges) 
 
     # Save cleaned medicare data
     df.to_csv(util.CLEAN_MEDICARE_DATA, index=False)
+
+def combine_data():
+    """
+    Combine cleaned GMC and Medicare data and save it to a CSV file.
+    """
+    
+    print("Combining cleaned GMC and Medicare data...")
+
+    # Load cleaned GMC and Medicare data
+    gmc = pd.read_csv(util.CLEAN_GMC_DATA)
+    medicare = pd.read_csv(util.CLEAN_MEDICARE_DATA)
+
+    # Merge on CPT/HCPCS codes
+    df = pd.merge(gmc, medicare, on='cpt_hcpcs', how='left')
+    
+    # Filter out rows with "minimum negotiated charge" and "maximum negotiated charge" under "insurer"
+    df = df[~df["insurer"].isin(["Minimum Negotiated Charge", "Maximum Negotiated Charge"])]
+    print(df['insurer'].unique())
+
+    # Save combined data
+    df.to_csv(util.WORKING_DATA, index=False)
     
     
     

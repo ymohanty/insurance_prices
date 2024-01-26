@@ -20,6 +20,7 @@ INT_MEDICARE_LVL1_DATA = str( INT_DATA + "/medicare_lvl1_data.csv")
 INT_MEDICARE_LAB_DATA = str( INT_DATA + "/medicare_lab_data.csv")
 CLEAN_GMC_DATA = str ( CLEAN_DATA + "/gmc_data.csv")
 CLEAN_MEDICARE_DATA = str( CLEAN_DATA + "/medicare_data.csv") 
+WORKING_DATA = str( CLEAN_DATA + "/working_data.csv")
 
 # Output paths
 OUT_PATH = str( Path(__file__).resolve().parent.parent / 'figures')
