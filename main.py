@@ -14,7 +14,8 @@ def main(argv=None):
     #prep_data(argv[1],argv[2:])
 
     # Clean both GMC and medicare data
-    clean_gmc_data()
+    #clean_gmc_data()
+    clean_medicare_data()
 
 
 def prep_data(gmc_data_source, medicare_data_sources):
@@ -41,7 +42,7 @@ def prep_data(gmc_data_source, medicare_data_sources):
     print("Unzipped GMC data.")
 
     # Remove metadata from GMC data
-    print("Removing metadata...")
+    print("Removing metadata from GMC data..")
     with open(util.RAW_GMC_DATA, "r", encoding="windows-1252") as f:
         lines = f.readlines()
     
@@ -54,6 +55,14 @@ def prep_data(gmc_data_source, medicare_data_sources):
     tabula.convert_into(util.MEDICARE_LVL2_PDF, util.INT_MEDICARE_LVL2_DATA, output_format="csv", pages="all")
     tabula.convert_into(util.MEDICARE_LAB_PDF, util.INT_MEDICARE_LAB_DATA, output_format="csv", pages="all")
 
+    # Remove metadata from medicare data
+    print("Removing metadata from medicare data..")
+    with open(util.INT_MEDICARE_LAB_DATA, "r") as f:
+        lines = f.readlines()
+    
+    with open(util.INT_MEDICARE_LAB_DATA, "w") as f:
+        f.writelines(lines[3:])
+
 
 def clean_gmc_data():
     """
@@ -63,18 +72,15 @@ def clean_gmc_data():
     """
     
     print("Cleaning GMC data...")
+    df = pd.read_csv(util.INT_GMC_DATA)
 
     # Strip nonstandard symbols from GMC data
-    df = pd.read_csv(util.INT_GMC_DATA)
-    df.replace('\$', '', regex=True, inplace=True)
-    df.replace(',', '', regex=True, inplace=True)
+    df = df.replace({'\$': '', ',': ''}, regex=True)
     
     # Correct types
-    numeric_part = df.iloc[:,8:]
-    string_part = df.iloc[:,0:8]
-    string_part = string_part.astype("string")
-    numeric_part = numeric_part.applymap(lambda x: pd.to_numeric(x, errors='coerce'))
-    df = pd.concat([string_part,numeric_part],axis=1)
+    string_columns = df.iloc[:, :8].astype(str)
+    numeric_columns = df.iloc[:, 8:].apply(pd.to_numeric, errors='coerce')
+    df = pd.concat([string_columns, numeric_columns], axis=1)
 
     # Turn GMC data wide to long
     df = df.drop(["Hospital","Charge Code/NDC/Supply ID",
@@ -101,7 +107,63 @@ def clean_gmc_data():
     df.to_csv(util.CLEAN_GMC_DATA, index=False)
 
 def clean_medicare_data():
+    """
+    Clean and standardize Medicare dataframes, concatenate them, fix variable types, and save the cleaned data to a CSV file.
+    """
+    
     print("Cleaning Medicare data...")
+
+    # Load medicare dataframes
+    lvl1 = pd.read_csv(util.INT_MEDICARE_LVL1_DATA)
+    lvl2 = pd.read_csv(util.INT_MEDICARE_LVL2_DATA)
+    lab = pd.read_csv(util.INT_MEDICARE_LAB_DATA)
+
+    # Standardize variables names in medicare data
+    lvl1.columns = lvl1.columns.str.replace('\W', '', regex=True)
+    lvl1.columns = lvl1.columns.str.replace('\d', '', regex=True)
+    lvl2.columns = lvl2.columns.str.replace('\W', '', regex=True)
+    lab.columns = lab.columns.str.replace('\W', '', regex=True)
+    lvl1 = lvl1.drop(['RankbyCharges'],axis=1)
+    lvl2 = lvl2.drop(['RankbyCharges'],axis=1)
+    lab = lab.drop(['RankedbyCharges'],axis=1)
+    lvl1.rename(columns={"HCPCSCode": "cpt_hcpcs",
+                         "QCYAllowedServicesQ":"allowed_services", 
+                         "AllowedCharges":"allowed_charges"},inplace=True)
+    lvl2.rename(columns={"HCPCSCode":"cpt_hcpcs","AllowedCharges":"allowed_charges",
+                "AllowedServices":"allowed_services"},inplace=True)
+    lab.rename(columns={"HCPCSCode":"cpt_hcpcs",
+                        "AllowedCharges":"allowed_charges",
+                        "AllowedServices":"allowed_services",
+                        "Desciption":"description"},inplace=True)
+    
+    # Concatenate vertically
+    df = pd.concat([lvl1,lvl2,lab],axis=0)
+
+    # Fix variable types
+    df = df.replace(',', '', regex=True)
+    df['allowed_services'] = pd.to_numeric(df['allowed_services'], errors='coerce')
+    df['allowed_charges'] = pd.to_numeric(df['allowed_charges'], errors='coerce')
+    df['cpt_hcpcs'] = df['cpt_hcpcs'].astype(str)
+    print(df)
+
+    # Percentage spending
+    # Compute the percentage of total spending
+    total_services = df['allowed_services'].sum()
+    total_charges = df['allowed_charges'].sum()
+
+    df['services_share'] = (df['allowed_services'] / total_services) 
+    df['charges_share'] = (df['allowed_charges'] / total_charges) 
+
+    # Save cleaned medicare data
+    df.to_csv(util.CLEAN_MEDICARE_DATA, index=False)
+    
+    
+    
+    
+
+
+
+
 
 
     
