@@ -49,3 +49,6 @@ data="https://www.geisinger.org/-/media/OneGeisinger/pdfs/ghs/patient-care/patie
 
 # Run main python file
 python "${project_root}/main.py" "${data}" "${medicare_lvl1}" "${medicare_lvl2}" "${medicare_lab}"
+
+# Compile tex output
+pdflatex "${project_root}/output.tex"
